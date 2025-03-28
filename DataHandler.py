@@ -13,24 +13,19 @@ class DataHandler:
 			predir = './Datasets/baby/'
 		elif args.data == 'sports':
 			predir = './Datasets/sports/'
-		elif args.data == 'tiktok':
-			predir = './Datasets/tiktok/'
+
 		self.predir = predir
 		self.trnfile = predir + 'trnMat.pkl'
 		self.tstfile = predir + 'tstMat.pkl'
 
 		self.imagefile = predir + 'image_feat.npy'
 		self.textfile = predir + 'text_feat.npy'
-		if args.data == 'tiktok':
-			self.audiofile = predir + 'audio_feat.npy'
 
 	def loadOneFile(self, filename):
 		with open(filename, 'rb') as fs:
 			ret = (pickle.load(fs) != 0).astype(np.float32)
-			# ret = pickle.load(fs)
 		if type(ret) != coo_matrix:
 			ret = sp.coo_matrix(ret)
-		# print(ret)
 		return ret
 
 	def normalizeAdj(self, mat): 
@@ -62,25 +57,21 @@ class DataHandler:
 	def LoadData(self):
 		trnMat = self.loadOneFile(self.trnfile)
 		tstMat = self.loadOneFile(self.tstfile)
-		# print(trnMat)
 
 		self.trnMat = trnMat
 		args.user, args.item = trnMat.shape
 
-		self.torchBiAdj = self.makeTorchAdj(trnMat) # 邻接矩阵(u+i)*(u+i)
+		self.torchBiAdj = self.makeTorchAdj(trnMat)
 
 		trnData = TrnData(trnMat)
-		self.trnLoader = dataloader.DataLoader(trnData, batch_size=args.batch, shuffle=True, num_workers=0) #采样用户、用户对应的一个正样本和负样本
+		self.trnLoader = dataloader.DataLoader(trnData, batch_size=args.batch, shuffle=True, num_workers=0)
 		tstData = TstData(tstMat, trnMat)
 		self.tstLoader = dataloader.DataLoader(tstData, batch_size=args.tstBat, shuffle=False, num_workers=0)
 
-		self.image_feats, args.image_feat_dim = self.loadFeatures(self.imagefile) # 18357, 4096
-		self.text_feats, args.text_feat_dim = self.loadFeatures(self.textfile) # 18357, 1024
+		self.image_feats, args.image_feat_dim = self.loadFeatures(self.imagefile)
+		self.text_feats, args.text_feat_dim = self.loadFeatures(self.textfile)
 
-		if args.data == 'tiktok':
-			self.audio_feats, args.audio_feat_dim = self.loadFeatures(self.audiofile)
-
-		self.diffusionData = DiffusionData(torch.FloatTensor(self.trnMat.A)) #.A将稀疏矩阵转化为numpy
+		self.diffusionData = DiffusionData(torch.FloatTensor(self.trnMat.A))
 		self.diffusionLoader = dataloader.DataLoader(self.diffusionData, batch_size=args.batch, shuffle=True, num_workers=0)
 
 class TrnData(data.Dataset):
@@ -126,7 +117,6 @@ class TstData(data.Dataset):
 		return len(self.tstUsrs)
 
 	def __getitem__(self, idx):
-		# 待测试用户的ID，待测试用户在训练交互矩阵中所对应的行数据
 		return self.tstUsrs[idx], np.reshape(self.csrmat[self.tstUsrs[idx]].toarray(), [-1])
 	
 class DiffusionData(data.Dataset):
@@ -134,7 +124,7 @@ class DiffusionData(data.Dataset):
 		self.data = data
 
 	def __getitem__(self, index):
-		item = self.data[index] # 取一个user的数据
+		item = self.data[index]
 		return item, index
 	
 	def __len__(self):

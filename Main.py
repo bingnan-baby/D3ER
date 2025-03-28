@@ -77,10 +77,9 @@ class Coach:
             log(self.makePrint('Train---[diffusion]', ep, args.epoch_per_stage, los_diff, 1))
             los_boos = self.trainEpoch_boost(stage, trained_model, opt)
             log(self.makePrint('Train--[boost]', ep, args.epoch_per_stage, los_boos, tstFlag))
-         # self.model_ensemble.model_dict[trained_model_name].load_state_dict(trained_model.model_dict[trained_model_name].state_dict())
 
          # phase 2
-         model_tmp = Model(self.handler.image_feats.detach(), self.handler.text_feats.detach()).cuda()  # 定义的位置在哪都行
+         model_tmp = Model(self.handler.image_feats.detach(), self.handler.text_feats.detach()).cuda()
          for i in self.model_name_list:
             model_tmp.model_dict[i].load_state_dict(self.model_ensemble.model_dict[i].state_dict())
 
@@ -157,9 +156,7 @@ class Coach:
 
       return torch.sparse.FloatTensor(idxs, vals, shape).cuda()
 
-   '''
-   预先将特征训练一下
-   '''
+
    def trainEpoch_pretrain(self):
       self.trnLoader = self.handler.trnLoader
       self.trnLoader.dataset.negSampling()
@@ -233,7 +230,6 @@ class Coach:
       trained_model_name = self.model_name_list[stage % 3]
       if stage < 3:
          masked_model_name = self.model_name_list[stage:]
-         # masked_model_name = trained_model_name
       else:
          masked_model_name = []
 
