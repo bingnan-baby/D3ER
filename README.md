@@ -1,6 +1,6 @@
-# D3ER: On the Disentangle and Ensemble of Multi-Modal Recommendation
+# D3ER: Supporting Multi-modal Recommendation via Disentangle and Distillation-based Dynamic Ensemble
 
-This is the PyTorch implementation for **D3ER** proposed in the paper **D3ER: On the Disentangle and Ensemble of Multi-Modal Recommendation**.
+This is the PyTorch implementation for **D3ER** proposed in the paper **D3ER: Supporting Multi-modal Recommendation via Disentangle and Distillation-based Dynamic Ensemble**.
 <center>
 <img src="figures/method.png" style="zoom:30%;" />
 </center>
